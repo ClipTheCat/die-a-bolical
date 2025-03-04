@@ -9,7 +9,9 @@ public class Main {
 	
 	private static Scanner scanner = new Scanner(System.in);
 	
-	private static GameState state = GameState.MainMenu;
+	private static LetterGraphics graphics = new LetterGraphics(20, 20);
+	
+	private static GameState gameState = GameState.MainMenu;
 	
 	// Player fields
 	
@@ -18,9 +20,24 @@ public class Main {
 		
 		try {
 			
-			System.out.println("Input an int");
-			int input = scanner.nextInt();
-			System.out.println(input);
+			switch(gameState) {
+			
+				case GameState.MainMenu: 
+					
+					for (int i = 0 i < 20; i++) {
+						println(graphics.getLine(i));
+					}
+					
+					break;
+					
+				case GameState.MainMenu: 
+				
+					break;
+					
+				case GameState.MainMenu: 
+	
+					break;
+			}
 			
 		} catch(InputMismatchException e) {
 			
@@ -37,5 +54,9 @@ public class Main {
 			update();
 			
 		}
+	}
+	
+	private static println(String input) {
+		System.out.println(input);
 	}
 }
