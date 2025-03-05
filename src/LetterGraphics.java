@@ -5,102 +5,88 @@ public class LetterGraphics {
 	
 	private ArrayList<Rectangle> rectangles;
 	
-	public Rectangle canvas;
+	private Rectangle canvas;
 	
-	private String emptyLine;
+	// In the form:
+	// { topLeft, topRight, bottomRight, bottomLeft, horizontalSide, verticalSide, fill }
+	private char[] borderCharacters; 
 	
-	public LetterArt(int canvasWidth, int canvasHeight) {
-		
+	public LetterGraphics(int canvasWidth, int canvasHeight, char[] borderCharacters) {
 		if (canvasWidth < 0 || canvasHeight < 0) {
-			
-			throw new Exception("Invalid canvas");
+			System.out.println("Invalid canvas, defaulting to 20x20");
+			canvas = new Rectangle(0, 0, 70, 34);
+		} else {
+			canvas = new Rectangle(0, 0, canvasWidth, canvasHeight);
 		}
-		
-		canvas = new Rectangle(0, 0, canvasWidth, canvasHeight);
 		
 		rectangles = new ArrayList<Rectangle>();
-		this.canvas = canvas;
-		emptyLine = new String(" ").repeat(canvas.dimensions[2]);
-	}
-	
-	public static void rectBorder(StringBuilder sb, Rectangle rect) {
 		
-		if (line < rect.y || line >= rect.y + rect.height) {
-			
-			return;
-		}
-		
-		if (line == rect.y) {
-			
-			output.setCharAt(rect.x, '╔');
-			output.replace(rect.x + 1, rect.x + rect.width - 2, "═");
-			output.setCharAt(rect.x + rect.width - 1, '╗');
-		
-		} else if (line == rect.y + rect.height - 1) {
-		
-			output.setCharAt(rect.x, '╚');
-			output.replace(rect.x + 1, rect.x + rect.width - 2, "═");
-			output.setCharAt(rect.x + rect.width - 1, '╝');
-			
+		if (borderCharacters.length == 7) {
+			this.borderCharacters = borderCharacters;
 		} else {
-			
-			output.setCharAt(rect.x, '║');
-			output.replace(rect.x + 1, rect.x + rect.width - 2, "═");
-			output.setCharAt(rect.x + rect.width - 1, '╝');
-
+			System.out.println("Expecting border character array of length 7, using default values");
+			this.borderCharacters = new char[] { '╔', '╗', '╝', '╚', '═', '║', ' '};
 		}
 	}
 	
+	public void addRect(Rectangle rect) {
+		rectangles.add(rect);
+	}
 	
-	public String getLine(int line) {
-		
-		if (line < 0 || line >= canvas.width) {
-			
+	public void removeRect(Rectangle rect) {
+		rectangles.remove(rect);
+	}
+	
+
+	public void clearRects() {
+		rectangles.clear();
+	}
+	
+	private static void buildLine(char leftChar, char middleChar, char rightChar, StringBuilder sb, Rectangle rect) {
+		int doubleX = 2 * rect.x;
+		int doubleWidth = 2 * rect.width;
+		sb.setCharAt(doubleX, leftChar);
+		sb.replace(doubleX + 1, doubleX + doubleWidth - 2, String.valueOf(middleChar).repeat(doubleWidth - 2));
+		sb.setCharAt(doubleX + doubleWidth - 1, rightChar);
+		sb.deleteCharAt(doubleX + doubleWidth); // TODO Why does it add an extra whitespace???
+	}
+	
+	public String getLine(int line) throws Exception {
+		if (line < 0 || line >= canvas.height) {
 			throw new Exception("Line out of range of canvas size");
-			
 		}
 		
-		StringBuilder output = new StringBuilder(emptyLine);
+		// The width of everything is visually stretched by a factor of 2, because characters are (roughly?) twice as tall as they are wide
+		StringBuilder output = new StringBuilder(new String(" ").repeat(2 * canvas.width));
 		
 		for (Rectangle rect : rectangles) {
+			if (line < rect.y || line >= rect.y + rect.height) {
+				continue;
+			}
 			
-			rectBorder(output, rect);
-			
+			// TODO use borderCharacters array to customize border characters 
+			if (line == rect.y) {
+				buildLine('╔', '═', '╗', output, rect);
+			} else if (line == rect.y + rect.height - 1) {
+				buildLine('╚', '═', '╝', output, rect);
+			} else {
+				buildLine('║', ' ', '║', output, rect);
+			}
 		}
 		
-		return output;
+		return output.toString();
+	}
+	
+	public void draw() {
+		try {
+			for(int i = 0; i < canvas.height; i++) {
+				System.out.println(getLine(i));
+			}
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
 	}
 }
-
-public class Rectangle {
-	
-	public int x;
-	public int y;
-	public int width;
-	public int height;
-	
-	public String text;
-	
-	public Rectangle(int x, int y, int width, int height) {
-		
-		this.x = x;
-		this.y = y;
-		this.width = width;
-		this.height = height;
-	}
-	
-	public Rectangle(int x, int y, int width, int height, String text) {
-		
-		this.x = x;
-		this.y = y;
-		this.width = width;
-		this.height = height;
-		this.text = text;
-	}
-	
-}
-
-
 
 /* 0 x
  * 1 x
