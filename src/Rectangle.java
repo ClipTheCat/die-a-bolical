@@ -1,3 +1,6 @@
+/*
+ * 
+ */
 
 public class Rectangle extends GameObject {
 	

@@ -1,4 +1,10 @@
-
+/*
+ * The base class for objects that can hold a position, dimensions, and a sprite. 
+ * This aims to make passing sprites and positions to the graphics manager easier.
+ * buildSprite(String fileName, int startLine, int height) returns an sprite (String array) from
+ * a user-defined text file. Child classes can override this method to customize how sprites are
+ * created, e.g. Rectangle.
+ */
 
 import java.io.File;
 import java.util.Scanner;
@@ -13,15 +19,12 @@ public abstract class GameObject {
 	
 	public String[] sprite;
 	
-	public GameObject() {
-		
-	}
+	public GameObject() { }
 	
 	public GameObject(String spriteFileName, int startLine, int spriteLineHeight) {
 		sprite = buildSprite(spriteFileName, startLine, spriteLineHeight);
 	}
 	
-	// startLine and endLine are inclusive 
 	protected static String[] buildSprite(String fileName, int startLine, int height) {
 		String[] outputSprite = new String[height]; 
 		File file = new File(fileName);

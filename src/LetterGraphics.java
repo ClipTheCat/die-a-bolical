@@ -1,5 +1,18 @@
-import java.util.ArrayList;
-import java.util.Arrays;
+/* 
+ * This class contains all the code needed for drawing the text-based "sprites".
+ * This aims to emulate a simplified typical pixel-based graphics API. 
+ * A sprite is represented by an array of strings, with each string being drawn aligned to the 
+ * left. 
+ * It exposes the following methods:
+ * 
+ *     clear()                                 | Clears the frame (with space characters).
+ *     draw(String[] sprite, int x, int y)     | Draws a sprite with its top-left corner at (x, y). 
+ *     print()                                 | Prints the current "image" to the console.
+ *     
+ * Keep in mind characters are monospaced but are about twice as tall as they are wide, i.e. a 
+ * Rectangle with equal width and height will not appear as a square. 
+ */
+
 import java.lang.StringBuilder;
 
 public class LetterGraphics {

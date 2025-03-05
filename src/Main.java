@@ -1,4 +1,4 @@
-// Some changes
+// Main class
 
 import java.util.Scanner;
 
