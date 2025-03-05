@@ -1,97 +1,43 @@
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.lang.StringBuilder;
 
 public class LetterGraphics {
 	
-	private ArrayList<Rectangle> rectangles;
+	private StringBuilder[] lines;
 	
 	private Rectangle canvas;
 	
-	// In the form:
-	// { topLeft, topRight, bottomRight, bottomLeft, horizontalSide, verticalSide, fill }
-	private char[] borderCharacters; 
-	
-	public LetterGraphics(int canvasWidth, int canvasHeight, char[] borderCharacters) {
+	public LetterGraphics(int canvasWidth, int canvasHeight) {
 		if (canvasWidth < 0 || canvasHeight < 0) {
-			System.out.println("Invalid canvas, defaulting to 20x20");
-			canvas = new Rectangle(0, 0, 70, 34);
+			System.out.println("Invalid canvas, defaulting to 70x31");
+			canvas = new Rectangle(0, 0, 70, 31);
 		} else {
 			canvas = new Rectangle(0, 0, canvasWidth, canvasHeight);
 		}
 		
-		rectangles = new ArrayList<Rectangle>();
-		
-		if (borderCharacters.length == 7) {
-			this.borderCharacters = borderCharacters;
-		} else {
-			System.out.println("Expecting border character array of length 7, using default values");
-			this.borderCharacters = new char[] { '╔', '╗', '╝', '╚', '═', '║', ' '};
+		lines = new StringBuilder[canvas.height];
+	}
+	
+	private static void drawSlice(StringBuilder sb, String spriteSlice, int x) {
+		sb.replace(x, x + spriteSlice.length(), spriteSlice);
+	}
+	
+	public void clear() {
+		for (int i = 0; i < lines.length; i++) {
+			lines[i] = new StringBuilder(new String(" ").repeat(canvas.width));
 		}
 	}
 	
-	public void addRect(Rectangle rect) {
-		rectangles.add(rect);
-	}
-	
-	public void removeRect(Rectangle rect) {
-		rectangles.remove(rect);
-	}
-	
-
-	public void clearRects() {
-		rectangles.clear();
-	}
-	
-	private static void buildLine(char leftChar, char middleChar, char rightChar, StringBuilder sb, Rectangle rect) {
-		int doubleX = 2 * rect.x;
-		int doubleWidth = 2 * rect.width;
-		sb.setCharAt(doubleX, leftChar);
-		sb.replace(doubleX + 1, doubleX + doubleWidth - 2, String.valueOf(middleChar).repeat(doubleWidth - 2));
-		sb.setCharAt(doubleX + doubleWidth - 1, rightChar);
-		sb.deleteCharAt(doubleX + doubleWidth); // TODO Why does it add an extra whitespace???
-	}
-	
-	public String getLine(int line) throws Exception {
-		if (line < 0 || line >= canvas.height) {
-			throw new Exception("Line out of range of canvas size");
+	public void draw(String[] sprite, int x, int y) {
+		for (int i = 0; i < sprite.length; i++) {
+			drawSlice(lines[y + i], sprite[i], x);
 		}
-		
-		// The width of everything is visually stretched by a factor of 2, because characters are (roughly?) twice as tall as they are wide
-		StringBuilder output = new StringBuilder(new String(" ").repeat(2 * canvas.width));
-		
-		for (Rectangle rect : rectangles) {
-			if (line < rect.y || line >= rect.y + rect.height) {
-				continue;
-			}
-			
-			// TODO use borderCharacters array to customize border characters 
-			if (line == rect.y) {
-				buildLine('╔', '═', '╗', output, rect);
-			} else if (line == rect.y + rect.height - 1) {
-				buildLine('╚', '═', '╝', output, rect);
-			} else {
-				buildLine('║', ' ', '║', output, rect);
-			}
-		}
-		
-		return output.toString();
 	}
 	
-	public void draw() {
-		try {
-			for(int i = 0; i < canvas.height; i++) {
-				System.out.println(getLine(i));
-			}
-		} catch(Exception e) {
-			e.printStackTrace();
+	public void print() {
+		for (int i = 0; i < canvas.height; i++) {
+			System.out.println(lines[i]);
 		}
 	}
 }
-
-/* 0 x
- * 1 x
- * 2
- * 3
- * 4
- * 5
- */
