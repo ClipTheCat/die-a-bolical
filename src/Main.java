@@ -15,7 +15,7 @@ public class Main {
 	// Player fields
 	
 	private static Cat testObj = new Cat();
-	private static Rectangle testRect = new Rectangle(0, 0, 20, 10);
+	private static Rectangle testRect = new Rectangle(0, 0, 10, 5);
 	
 	private static void update() {
 		try {
@@ -24,11 +24,13 @@ public class Main {
 				case GameState.MainMenu: 
 					graphics.clear();
 					
+					testRect.x = Integer.parseInt(scanner.next());
+					testRect.y = Integer.parseInt(scanner.next());
+					
 					graphics.draw(testRect.sprite, testRect.x, testRect.y);
 					graphics.draw(testObj.sprite, 4, 4);
 					
 					graphics.print();
-					scanner.next();
 					
 					break;
 					
