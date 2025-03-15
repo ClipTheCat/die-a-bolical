@@ -38,6 +38,7 @@ public class Main {
 					break;
 					
 				case GameState.Playing: 
+					graphics.clear();
 					int playerLocationx = 4;
 					int playerLocationy = 4; 
 					graphics.draw(testObj.sprite, playerLocationx, playerLocationy);
