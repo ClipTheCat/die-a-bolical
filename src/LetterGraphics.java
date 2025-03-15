@@ -55,13 +55,16 @@ public class LetterGraphics {
 	}
 	
 	public void draw(String[] sprite, int x, int y) {
-		if(x >= canvas.width || y >= canvas.height) {
+		// Check if sprite is fully outside of the canvas
+		// TODO top/left cutoff? Currently negative coordinates aren't supported even if some of
+		// the sprite woud still be visible
+		if(x >= canvas.width || y >= canvas.height || x < 0 || y < 0) {
 			return;
 		}
 		
 		for (int i = 0; i < sprite.length; i++) {
 			// If the line trying to be drawn is outside of the canvas, exit the whole method as
-			// all future lines in this sprite will also be outside. 
+			// all future lines in this sprite will also be outside
 			if (y + i >= lines.length) {
 				return;
 			}

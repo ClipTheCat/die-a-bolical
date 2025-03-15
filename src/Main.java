@@ -23,10 +23,7 @@ public class Main {
 			
 				case GameState.MainMenu: 
 					graphics.clear();
-					
-					testRect.x = Integer.parseInt(scanner.next());
-					testRect.y = Integer.parseInt(scanner.next());
-					
+
 					graphics.draw(testRect.sprite, testRect.x, testRect.y);
 					graphics.draw(testObj.sprite, 4, 4);
 					
