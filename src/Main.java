@@ -10,12 +10,15 @@ public class Main {
 	
 	private static LetterGraphics graphics = new LetterGraphics(70, 31);
 	
-	private static GameState gameState = GameState.MainMenu;
+	private static GameState gameState = GameState.Playing;
+	
+	private static CharacterState characterState = CharacterState.Idle;
 	
 	// Player fields
 	
 	private static Cat testObj = new Cat();
 	private static Rectangle testRect = new Rectangle(0, 0, 10, 5);
+	private static Food heldItem = new Food();
 	
 	private static void update() {
 		try {
@@ -35,7 +38,19 @@ public class Main {
 					break;
 					
 				case GameState.Playing: 
-				
+					int playerLocationx = 4;
+					int playerLocationy = 4; 
+					graphics.draw(testObj.sprite, playerLocationx, playerLocationy);
+				switch(characterState) {
+				case CharacterState.Idle:
+					break;
+				case CharacterState.Holding:
+					graphics.draw(heldItem.sprite, playerLocationx-1, playerLocationy-1);
+					break;
+				case CharacterState.InFridge:
+					//ask for item number
+					break;
+				}
 					break;
 					
 				case GameState.GameOver: 
