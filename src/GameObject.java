@@ -25,7 +25,7 @@ public abstract class GameObject {
 		sprite = buildSprite(spriteFileName, startLine, spriteLineHeight);
 	}
 	
-	protected static String[] buildSprite(String fileName, int startLine, int height) {
+	public static String[] buildSprite(String fileName, int startLine, int height) {
 		String[] outputSprite = new String[height]; 
 		File file = new File(fileName);
 		

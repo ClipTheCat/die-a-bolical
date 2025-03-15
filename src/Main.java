@@ -46,7 +46,8 @@ public class Main {
 			e.printStackTrace();
 			scanner.nextLine();
 		}
-	}
+		
+		}
 	
 	public static void main(String[] args) {
 		println("\n\n\n\n\n══════════════════════════════\nGame started!\n══════════════════════════════\n\n\n\n\n");
