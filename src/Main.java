@@ -1,6 +1,5 @@
-// Some changes
+// Main class
 
-import java.util.InputMismatchException;
 import java.util.Scanner;
 
 public class Main {
@@ -9,33 +8,55 @@ public class Main {
 	
 	private static Scanner scanner = new Scanner(System.in);
 	
-	private static GameState state = GameState.MainMenu;
+	private static LetterGraphics graphics = new LetterGraphics(70, 31);
+	
+	private static GameState gameState = GameState.MainMenu;
 	
 	// Player fields
 	
+	private static Cat testObj = new Cat();
+	private static Rectangle testRect = new Rectangle(0, 0, 10, 5);
 	
 	private static void update() {
-		
 		try {
+			switch(gameState) {
 			
-			System.out.println("Input an int");
-			int input = scanner.nextInt();
-			System.out.println(input);
-			
-		} catch(InputMismatchException e) {
-			
-			System.out.println("An exception occured: " + e);
+				case GameState.MainMenu: 
+					graphics.clear();
+					
+					testRect.x = Integer.parseInt(scanner.next());
+					testRect.y = Integer.parseInt(scanner.next());
+					
+					graphics.draw(testRect.sprite, testRect.x, testRect.y);
+					graphics.draw(testObj.sprite, 4, 4);
+					
+					graphics.print();
+					
+					break;
+					
+				case GameState.Playing: 
+				
+					break;
+					
+				case GameState.GameOver: 
+	
+					break;
+			}
+		} catch(Exception e) {
+			e.printStackTrace();
 			scanner.nextLine();
-			
 		}
 	}
 	
 	public static void main(String[] args) {
+		println("\n\n\n\n\n══════════════════════════════\nGame started!\n══════════════════════════════\n\n\n\n\n");
 		
 		while(gameRunning) {
-			
 			update();
-			
 		}
+	}
+	
+	private static void println(String string) {
+		System.out.println(string);
 	}
 }
