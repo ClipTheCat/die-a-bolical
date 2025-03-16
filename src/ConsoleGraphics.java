@@ -36,7 +36,7 @@ public class ConsoleGraphics {
 			lines[i] = new StringBuilder(new String(" ").repeat(canvas.width));
 		}
 		
-		frame = 0;
+		frame = 1;
 	}
 	
 	private void drawSlice(StringBuilder sb, String spriteSlice, int x) {
@@ -56,6 +56,8 @@ public class ConsoleGraphics {
 		for (int i = 0; i < lines.length; i++) {
 			lines[i].replace(0, lines[i].length(), emptyLine);
 		}
+		
+		draw(canvas.sprite, 0, 0);
 	}
 	
 	public void draw(String text, int x, int y) {
