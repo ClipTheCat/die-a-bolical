@@ -21,10 +21,6 @@ public abstract class GameObject {
 	
 	public GameObject() { }
 	
-	public GameObject(String spriteFileName, int startLine, int spriteLineHeight) {
-		sprite = buildSprite(spriteFileName, startLine, spriteLineHeight);
-	}
-	
 	public static String[] buildSprite(String fileName, int startLine, int height) {
 		String[] outputSprite = new String[height]; 
 		File file = new File(fileName);

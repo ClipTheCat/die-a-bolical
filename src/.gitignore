@@ -2,9 +2,18 @@
 /FoodType.class
 /GameState.class
 /IngredientType.class
+<<<<<<< HEAD
+/Main.class
+=======
 /LetterGraphics.class
 /Main.class
 /Rectangle.class
 /Customer.class
 /GameObject.class
 /Cat.class
+>>>>>>> branch 'main' of http://github.com/ClipTheCat/die-a-bolical
+/CharacterState.class
+/FoodItem.class
+/Food.class
+/ConsoleGraphics.class
+/Person.class

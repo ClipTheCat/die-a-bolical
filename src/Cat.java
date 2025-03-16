@@ -2,6 +2,6 @@
 public class Cat extends GameObject {
 	
 	public Cat() {
-		super("Sprites", 1, 3);
+		sprite = buildSprite("Sprites", 1, 3);
 	}
 }

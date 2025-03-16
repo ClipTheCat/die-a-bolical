@@ -15,13 +15,15 @@
 
 import java.lang.StringBuilder;
 
-public class LetterGraphics {
+public class ConsoleGraphics {
 	
 	private StringBuilder[] lines;
 	
-	private Rectangle canvas;
+	public Rectangle canvas;
 	
-	public LetterGraphics(int canvasWidth, int canvasHeight) {
+	public int frame;
+	
+	public ConsoleGraphics(int canvasWidth, int canvasHeight) {
 		if (canvasWidth < 0 || canvasHeight < 0) {
 			System.out.println("Invalid canvas, defaulting to 70x31");
 			canvas = new Rectangle(0, 0, 70, 31);
@@ -33,6 +35,8 @@ public class LetterGraphics {
 		for (int i = 0; i < lines.length; i++) {
 			lines[i] = new StringBuilder(new String(" ").repeat(canvas.width));
 		}
+		
+		frame = 0;
 	}
 	
 	private void drawSlice(StringBuilder sb, String spriteSlice, int x) {
@@ -50,8 +54,16 @@ public class LetterGraphics {
 	public void clear() {
 		String emptyLine = new String(" ").repeat(canvas.width);
 		for (int i = 0; i < lines.length; i++) {
-			lines[i].replace(0, canvas.width + 1, emptyLine);
+			lines[i].replace(0, lines[i].length(), emptyLine);
 		}
+	}
+	
+	public void draw(String text, int x, int y) {
+		if(x >= canvas.width || y >= canvas.height || x < 0 || y < 0) {
+			return;
+		}
+		
+		drawSlice(lines[y], text, x);
 	}
 	
 	public void draw(String[] sprite, int x, int y) {
@@ -65,7 +77,7 @@ public class LetterGraphics {
 		for (int i = 0; i < sprite.length; i++) {
 			// If the line trying to be drawn is outside of the canvas, exit the whole method as
 			// all future lines in this sprite will also be outside
-			if (y + i >= lines.length) {
+			if (y + i >= canvas.height) {
 				return;
 			}
 			
@@ -74,8 +86,16 @@ public class LetterGraphics {
 	}
 	
 	public void print() {
+		System.out.println("");
+		
+		lines[1].append(" Frame: " + frame);
+		frame++;
+		
 		for (int i = 0; i < canvas.height; i++) {
 			System.out.println(lines[i]);
 		}
+		
+		System.out.println("");
+		System.out.print("> ");
 	}
 }
