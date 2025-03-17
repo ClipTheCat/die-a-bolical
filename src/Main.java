@@ -207,8 +207,6 @@ public class Main {
 					if (!stillAlive) {
 						gameState = GameState.GameOver;
 					}
-					
-					movesLeft--;
 					   
 					// Check for win
 					if (movesLeft <= 0) {
@@ -231,6 +229,7 @@ public class Main {
 					graphics.print();
 					if (handleGameInput()) {
 						spreadZombification();
+						movesLeft--;
 					}
 					
 					break;
