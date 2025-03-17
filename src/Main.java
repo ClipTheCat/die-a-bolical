@@ -1,5 +1,6 @@
 // Main class
 
+import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.InputMismatchException;
 import java.util.NoSuchElementException;
@@ -22,9 +23,11 @@ public class Main {
 	
 	private static int secretZombie;
 	
+	private static boolean debugMode = false;
+	
 	// Player fields
 	
-	private static int movesLeft;
+	private static int movesLeft = 100;
 	
 	
 	
@@ -60,41 +63,67 @@ public class Main {
 		try {
 			target = inputScanner.nextInt();
 			executer = inputScanner.nextInt(); 
+			target--;
+			executer--;
 		} catch (InputMismatchException e){
-			println("Input type mismatch, please check your input or type \"info\" for action references.");
+			printerrln("Input type mismatch.");
 			return;
 		} catch (NoSuchElementException e) {
-			println("Insufficient number of arguments, please check your input or type \"info\" for action references.");
+			printerrln("Insufficient number of arguments.");
 			return;
 		}
 		
 		if (target < 0 || target >= people.length || executer < 0 || executer >= people.length) {
-			println("1 or more person selection is of range, please check your input or type \"info\" for action references.");
+			printerrln("1 or more person selection is of range.");
 			return;
 		}
 
 		if (people[target].sprite == Person.deadSprite) {
-			println("Target is already dead, please check your input or type \"info\" for action references.");
+			printerrln("Target is already dead.");
 			return;
 		}
 		
 		if (people[executer].sprite == Person.zombieSprite || people[executer].sprite == Person.deadSprite) {
-			println("Selected executor is not able to do this action, please check your input or type \"info\" for action references.");
+			printerrln("The selected executor is not able to perform this action.");
 			return;
 		}
 		
 		if ((people[target].sprite == Person.zombieSprite || target == secretZombie) && executer != secretZombie) {
-			println("Tried to zombify");
 			if (Math.random() < 0.5) {
 				people[executer].zombify();
-				println("Zombified");
 			}
 		}
 			
 		people[target].kill();
 	}
 	
-	private static void handleGameInput() {
+	private static void spreadZombification() {
+        for (int i = 0; i < people.length; i++) {
+            if (people[i].sprite == Person.zombieSprite || i == secretZombie) {
+                if (Math.random() < 0.2) {
+                    ArrayList<Integer> indecesOfLivingPeople = indecesOfLivingPeople();
+                    int j = (int)(Math.random() * (indecesOfLivingPeople.size()));
+                    int toBeKilled = indecesOfLivingPeople.get(j);
+                    people[toBeKilled].zombify();
+                    // println(toBeKilled + " was randomly zombified!");
+                	}
+            	}
+        	}
+    	}
+	
+    private static ArrayList<Integer> indecesOfLivingPeople() {
+    	ArrayList<Integer> livingPeople = new ArrayList<Integer>();
+    	for(int j = 0; j < people.length; j++) {
+    			if (people[j].sprite == Person.aliveSprite && j != secretZombie) { 
+    			livingPeople.add(j);
+    		}
+    	}
+        return livingPeople;
+    }
+	
+	private static boolean handleGameInput() {
+		boolean playerMoveCompleted = true;
+		
 		String input = scanner.nextLine();
 		
 		Scanner inputScanner = new Scanner(input);
@@ -102,17 +131,26 @@ public class Main {
 		switch (inputScanner.next()) {
 			case "info":
 				gameState = GameState.Instructions;
+				playerMoveCompleted = false;
 				break;
 				
 			case "kill":
 				kill(inputScanner);
 				break;
 				
+			case "toggleDebug":
+				debugMode = !debugMode;
+				playerMoveCompleted = false;
+				break; 
+				
 			default:
-				println("Input not recognized, please check your input or type \\\"info\\\" for action references.");
+				printerrln("Input not recognized.");
+				playerMoveCompleted = false;
 		}
 		
 		inputScanner.close();
+		
+		return playerMoveCompleted;
 	}
 	
 	private static void drawPeople() {
@@ -158,21 +196,50 @@ public class Main {
 					break;
 				
 				case GameState.Playing: 
+					// Check for  loss
+					boolean stillAlive = false;
+					for (int i = 0; i < people.length; i++) {
+						if (people[i].sprite == Person.aliveSprite && i != secretZombie) {
+							stillAlive = true;
+							break;
+						}
+					}
+					if (!stillAlive) {
+						gameState = GameState.GameOver;
+					}
+					
+					movesLeft--;
+					   
+					// Check for win
+					if (movesLeft <= 0) {
+						gameState = GameState.Win;
+					}
+					
 					graphics.clear();
 					
 					drawPeople();
-					// Events logger box
-					graphics.draw(new Rectangle(0, 0, 35, graphics.canvas.height - 2).sprite, 77, 1);
 					
+					// GUI
+					graphics.draw(new Rectangle(0, 0, 35, graphics.canvas.height - 2).sprite, 77, 1); // Events logger box
+					graphics.draw("Moves left: " + movesLeft, 4, 12);
+					
+					// Debug mode
+					if (debugMode) {
+						graphics.draw("Secret zombie: " + (secretZombie + 1), 4, 16);
+					}
 					
 					graphics.print();
-					handleGameInput();
+					if (handleGameInput()) {
+						spreadZombification();
+					}
+					
 					break;
 					
 				case GameState.GameOver: 
 					graphics.clear();
 					
-					
+					graphics.draw("The zombies ate your brains! And your arms. And every other part of you. They were very hungry. Try again?", 1, 1);
+					graphics.draw("Enter anything to return to the main menu.", 1, 2);
 					
 					graphics.print();
 					scanner.nextLine();
@@ -182,7 +249,8 @@ public class Main {
 				case GameState.Win:
 					graphics.clear();
 					
-					
+					graphics.draw("You beat the zombies!", 1, 1);
+					graphics.draw("Enter anything to return to the main menu.", 1, 2);
 					
 					graphics.print();
 					scanner.nextLine();
@@ -205,5 +273,10 @@ public class Main {
 	
 	private static void println(String string) {
 		System.out.println(string);
+	}
+	
+	private static void printerrln(String string) {
+		println(string);
+		println("Please check your input or type \\\"info\\\" for action references");
 	}
 }
