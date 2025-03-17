@@ -18,19 +18,52 @@ public class Main {
 	
 	private static Person[] people;
 	
+	private static int secretZombie;
+	
 	// Player fields
 	
 	private static int movesLeft;
 	
 	
 	
-	private static void initializeLevel(int level) {
-		people = new Person[5];
+	private static void initializeGame() {
+		people = new Person[8];
+		secretZombie = (int)Math.floor(8 * Math.random());
 		for (int i = 0; i < people.length; i++) {
 			people[i] = new Person();
+			
+			// Create suspicions 
+			for (int j = 0; j < people.length; j++) {
+				// Don't let people be suspicious of themself
+				if (j == i) {
+					continue;
+				}
+				if (j == secretZombie) {
+					if (Math.random() < 0.5) {
+						people[i].suspicions.add(secretZombie);
+					}
+				}
+				if (Math.random() < 0.3) {
+					people[i].suspicions.add(j);
+				}
+			}
 		}
 		
-		// TODO
+	}
+	
+	private static void handleGameInput() {
+		String input = scanner.nextLine();
+		
+		//scanner.
+	}
+	
+	private static void drawPeople() {
+		int xPos;
+		for (int i = 0; i < people.length; i++) {
+			xPos = 4 + 8 * i;
+			graphics.draw(people[i].sprite, xPos, 6);
+			graphics.draw("#" + (i + 1), xPos, 5);
+		}
 	}
 	
 	private static void update() {
@@ -39,7 +72,8 @@ public class Main {
 				case GameState.MainMenu: 
 					graphics.clear();
 					
-					graphics.draw("Zombie Game Name Here", 3, 3);
+					graphics.draw("Zombies!", 3, 3);
+					graphics.draw("A game about preventing a zombie virus outbreak", 3, 4);
 					graphics.draw("\"play\" to start game, \"exit\" to quit.", 3, graphics.canvas.height - 3);
 					
 					graphics.print();
@@ -47,7 +81,7 @@ public class Main {
 					String input = scanner.nextLine().toLowerCase();
 					if (input.equalsIgnoreCase("play")) {
 						gameState = GameState.Instructions;
-						initializeLevel(1);
+						initializeGame();
 					} else if (input.equalsIgnoreCase("quit")) {
 						gameRunning = false;
 					}
@@ -57,8 +91,8 @@ public class Main {
 				case GameState.Instructions: 
 					graphics.clear();
 					
-					graphics.draw(GameObject.buildSprite("Instructions", 1, 28), 1, 1);
-					
+					graphics.draw(GameObject.buildSprite("Instructions", 1, 30), 1, 1);
+
 					graphics.print();
 					
 					scanner.nextLine();
@@ -68,20 +102,33 @@ public class Main {
 				case GameState.Playing: 
 					graphics.clear();
 					
-					for (int i = 0; i < people.length; i++) {
-						graphics.draw(people[i].sprite, 4 + 16 * i, 6);
-					}
-					
+					drawPeople();
+					// Events logger box
 					graphics.draw(new Rectangle(0, 0, 35, graphics.canvas.height - 2).sprite, 77, 1);
+					
 					
 					graphics.print();
 					scanner.nextLine();
 					break;
 					
 				case GameState.GameOver: 
-	
+					graphics.clear();
 					
+					
+					
+					graphics.print();
+					scanner.nextLine();
+					gameState = GameState.MainMenu;
 					break;
+				
+				case GameState.Win:
+					graphics.clear();
+					
+					
+					
+					graphics.print();
+					scanner.nextLine();
+					gameState = GameState.MainMenu;
 			}
 		} catch(Exception e) {
 			e.printStackTrace();
