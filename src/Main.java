@@ -21,6 +21,12 @@ public class Main {
 	
 	private static Person[] people;
 	
+	private static ArrayList<String> eventLog;
+	
+	private static String commandFeedback;
+	
+	private static String dialogue;
+	
 	private static boolean debugMode = true;
 	
 	// These 2 are used to let the game display the game scene for 1 frame after winning or losing
@@ -32,9 +38,11 @@ public class Main {
 	
 	private static final int numPeople = 8;
 	
-	private static final double infectionSpreadChance = 0.3;
+	private static final double infectionSpreadChance = 0.4;
 	
 	private static final double actionKillFailChance = 0;
+	
+	private static final double actionKillInfectionPassChance = 0.7;
 	
 	private static final double actionQuarantineFailChance = 0.3;
 	
@@ -72,6 +80,9 @@ public class Main {
 			}
 		}
 		people[secretZombie].state = PersonState.Zombie;
+		
+		eventLog = new ArrayList<String>();
+		dialogue = "";
 	}
 	
 	private static boolean actionKill(Scanner commandScanner) {
@@ -113,7 +124,7 @@ public class Main {
 		}
 		
 		if (people[target].state == PersonState.Zombie) {
-			if (Math.random() < 0.5) { // TEMP
+			if (Math.random() < actionKillInfectionPassChance) {
 				people[executer].zombify();
 			}
 		}
@@ -138,12 +149,12 @@ public class Main {
 		}
 		
 		if (target < 0 || target >= people.length || executer < 0 || executer >= people.length) {
-			printerrln("1 or more person selection is of range.");
+			printerrln("1 or more selections are of range.");
 			return false;
 		}
 		
 		if (people[target].state == PersonState.Dead) {
-			printerrln("Target is already dead.");
+			printerrln("The target is already dead.");
 			return false;
 		}
 		
@@ -163,6 +174,44 @@ public class Main {
 		
 		people[target].quarantined = true;
 		
+		return true;
+	}
+	
+	private static boolean actionQuestion(Scanner commandScanner) {
+		int target;
+		try {
+			target = commandScanner.nextInt() - 1;
+		} catch (InputMismatchException e){
+			printerrln("Input type mismatch.");
+			return false;
+		} catch (NoSuchElementException e) {
+			printerrln("Insufficient number of arguments.");
+			return false;
+		}
+		
+		if (target < 0 || target >= people.length) {
+			printerrln("The selection is of range.");
+			return false;
+		}
+		
+		if (people[target].state != PersonState.Alive) {
+			printerrln("Target cannot be questioned, because dead people and zombies don't like talking to you.");
+			return false;
+		}
+		
+		String formattedSuspicions = "";
+		ArrayList<Integer> suspicions = people[target].suspicions;
+		
+		if (suspicions.size() == 0) {
+			printlnBelowPeople("#" + (target + 1) + ": I don't think anyone is a zombie here. Maybe you're just buying into alarmist propaganda.");
+			return true;
+		}
+		
+		for (int i = 0; i < suspicions.size(); i++) {
+			formattedSuspicions += i == people.length - 1 ? "and #" + (suspicions.get(i) + 1) : "#" + (suspicions.get(i) + 1) + ", ";
+		}
+		
+		printlnBelowPeople("#" + (target + 1) + ": I think " + formattedSuspicions + " are acting weird.");
 		return true;
 	}
 	
@@ -263,6 +312,10 @@ public class Main {
 				
 			case "quarantine":
 				playerMoveCompleted = actionQuarantine(commandScanner);
+				break;
+				
+			case "question":
+				playerMoveCompleted = actionQuestion(commandScanner);
 				
 			case "toggleDebug":
 				debugMode = !debugMode;
@@ -338,7 +391,7 @@ public class Main {
 					
 					graphics.draw("Zombies!", 3, 3);
 					graphics.draw("A game about preventing a zombie virus outbreak", 3, 4);
-					graphics.draw("\"play\" to start game, \"exit\" to quit.", 3, graphics.canvas.height - 3);
+					graphics.draw("\"play\" to start game, \"exit\" to quit the program.", 3, graphics.canvas.height - 3);
 					
 					graphics.print();
 					
@@ -371,6 +424,7 @@ public class Main {
 					// GUI
 					graphics.draw(new Rectangle(0, 0, 35, graphics.canvas.height - 2).sprite, 77, 1); // Events logger box
 					graphics.draw("Moves left: " + movesLeft, 4, 12);
+					graphics.draw(dialogue, 4, 16);
 					
 					// Debug mode
 					if (debugMode) {
@@ -380,7 +434,7 @@ public class Main {
 								secretZombies.add(i + 1);
 							}
 						}
-						graphics.draw("Secret zombie(s): " + secretZombies, 4, 16);
+						graphics.draw("Secret zombie(s): " + secretZombies, 4, 2);
 					}
 					
 					graphics.print();
@@ -389,9 +443,13 @@ public class Main {
 					// Allows for a frame of the game to be displayed before moving on to the win
 					// or loss screen so players know how they won or lost.
 					if (lost) {
+						
+						
 						scanner.nextLine();
 						gameState = GameState.GameOver;
 					} else if (won) {
+						
+						
 						scanner.nextLine();
 						gameState = GameState.Win;
 					} else { // If no win or loss, continue with game logic
@@ -412,10 +470,9 @@ public class Main {
 					if (playerMoveCompleted) {
 						movesLeft--;
 						
-						
 						spreadZombification();
 						clearQuarantine();
-						
+						dialogue = "";
 					}
 					
 					break;
@@ -456,12 +513,19 @@ public class Main {
 		}
 	}
 	
+	
 	private static void println(String string) {
 		System.out.println(string);
 	}
 	
+	
 	private static void printerrln(String string) {
 		println(string);
 		println("Please check your input or type \"info\" for action references");
+	}
+	
+	// Writes text as dialogue under the line of people.  
+	private static void printlnBelowPeople(String string, int speakerIndex) {
+		dialogue = speakerIndex + 1 + ": " + string;
 	}
 }

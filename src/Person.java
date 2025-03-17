@@ -4,7 +4,7 @@ import java.util.ArrayList;
 public class Person extends GameObject {
 	
 	// AI fields
-	public PersonState state;
+	public PersonState state; // the secret zombie has a value of PersonState.Zombie in this field but their sprite is the aliveSprite
 	public ArrayList<Integer> suspicions;
 	public boolean quarantined;
 	
