@@ -19,7 +19,7 @@ Actions
     (Requires a living person to execute)
     Kills a person, taking them out of the game permanently. 
     Fail: 0% 
-    Side effect: If the target is a zombie, there is a 40% chance the executer will be infected.  
+    Side effect: If the target is a zombie, there is a 50% chance the executer will be infected.  
     
   question [target (living)] 
     Gets a person's list of individuals they are suspicious of. 

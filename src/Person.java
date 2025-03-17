@@ -7,9 +7,10 @@ public class Person extends GameObject {
 	// The zombie's identity is stored externally
 	public ArrayList<Integer> suspicions;
 	
-	private static String[] aliveSprite = buildSprite("Sprites", 1, 5);
-	private static String[] deadSprite = buildSprite("Sprites", 7, 5);
-	private static String[] zombieSprite = buildSprite("Sprites", 13, 5);
+	// The sprite of a person controls their actual state, because there's no reason to add another field for this purpose
+	public static final String[] aliveSprite = buildSprite("Sprites", 1, 5);
+	public static final String[] deadSprite = buildSprite("Sprites", 7, 5);
+	public static final String[] zombieSprite = buildSprite("Sprites", 13, 5);
 	
 	public Person() {
 		sprite = aliveSprite;

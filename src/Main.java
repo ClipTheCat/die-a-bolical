@@ -1,6 +1,8 @@
 // Main class
 
 import java.util.Scanner;
+import java.util.InputMismatchException;
+import java.util.NoSuchElementException;
 
 public class Main {
 	
@@ -29,6 +31,7 @@ public class Main {
 	private static void initializeGame() {
 		people = new Person[8];
 		secretZombie = (int)Math.floor(8 * Math.random());
+		println("Secret zombie: " + secretZombie);
 		for (int i = 0; i < people.length; i++) {
 			people[i] = new Person();
 			
@@ -51,10 +54,65 @@ public class Main {
 		
 	}
 	
+	private static void kill(Scanner inputScanner) {
+		int target;
+		int executer;
+		try {
+			target = inputScanner.nextInt();
+			executer = inputScanner.nextInt(); 
+		} catch (InputMismatchException e){
+			println("Input type mismatch, please check your input or type \"info\" for action references.");
+			return;
+		} catch (NoSuchElementException e) {
+			println("Insufficient number of arguments, please check your input or type \"info\" for action references.");
+			return;
+		}
+		
+		if (target < 0 || target >= people.length || executer < 0 || executer >= people.length) {
+			println("1 or more person selection is of range, please check your input or type \"info\" for action references.");
+			return;
+		}
+
+		if (people[target].sprite == Person.deadSprite) {
+			println("Target is already dead, please check your input or type \"info\" for action references.");
+			return;
+		}
+		
+		if (people[executer].sprite == Person.zombieSprite || people[executer].sprite == Person.deadSprite) {
+			println("Selected executor is not able to do this action, please check your input or type \"info\" for action references.");
+			return;
+		}
+		
+		if ((people[target].sprite == Person.zombieSprite || target == secretZombie) && executer != secretZombie) {
+			println("Tried to zombify");
+			if (Math.random() < 0.5) {
+				people[executer].zombify();
+				println("Zombified");
+			}
+		}
+			
+		people[target].kill();
+	}
+	
 	private static void handleGameInput() {
 		String input = scanner.nextLine();
 		
-		//scanner.
+		Scanner inputScanner = new Scanner(input);
+		
+		switch (inputScanner.next()) {
+			case "info":
+				gameState = GameState.Instructions;
+				break;
+				
+			case "kill":
+				kill(inputScanner);
+				break;
+				
+			default:
+				println("Input not recognized, please check your input or type \\\"info\\\" for action references.");
+		}
+		
+		inputScanner.close();
 	}
 	
 	private static void drawPeople() {
@@ -68,7 +126,7 @@ public class Main {
 	
 	private static void update() {
 		try {
-			switch(gameState) {
+			switch (gameState) {
 				case GameState.MainMenu: 
 					graphics.clear();
 					
@@ -108,7 +166,7 @@ public class Main {
 					
 					
 					graphics.print();
-					scanner.nextLine();
+					handleGameInput();
 					break;
 					
 				case GameState.GameOver: 
@@ -130,7 +188,7 @@ public class Main {
 					scanner.nextLine();
 					gameState = GameState.MainMenu;
 			}
-		} catch(Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 			scanner.nextLine();
 		}
