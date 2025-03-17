@@ -323,9 +323,11 @@ public class Main {
 				break; 
 				
 			case "setState":
-				adminActionSetState(commandScanner);
-				playerMoveCompleted = false;
-				break;
+				if (debugMode) {
+					adminActionSetState(commandScanner);
+					playerMoveCompleted = false;
+					break;
+				}
 				
 			default:
 				printerrln("Input not recognized.");
