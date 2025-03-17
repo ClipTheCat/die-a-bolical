@@ -12,8 +12,9 @@ Actions
 
   quarantine [target] [executer]
     (Requires a living person to execute)
-    Quarantine a person, freezing it for 1 turn.
-    Fail: 20%, if the target is a zombie the executer will be infected.  
+    Quarantines a person. If they are a zombie, this will freeze them for 1 turn. If they are
+    living, they can not be infected for 1 turn.
+    Fail: 30%, if the target is a zombie the executer will be infected.  
   
   kill [target] [executer]
     (Requires a living person to execute)

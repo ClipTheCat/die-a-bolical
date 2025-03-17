@@ -4,24 +4,37 @@ import java.util.ArrayList;
 public class Person extends GameObject {
 	
 	// AI fields
-	// The zombie's identity is stored externally
+	public PersonState state;
 	public ArrayList<Integer> suspicions;
+	public boolean quarantined;
 	
-	// The sprite of a person controls their actual state, because there's no reason to add another field for this purpose
 	public static final String[] aliveSprite = buildSprite("Sprites", 1, 5);
 	public static final String[] deadSprite = buildSprite("Sprites", 7, 5);
 	public static final String[] zombieSprite = buildSprite("Sprites", 13, 5);
 	
 	public Person() {
 		sprite = aliveSprite;
+		state = PersonState.Alive;
 		suspicions = new ArrayList<Integer>();
+		quarantined = false;
+	}
+	
+	public void revive() {
+		state = PersonState.Alive;
+		sprite = aliveSprite;
 	}
 	
 	public void zombify() {
+		if (sprite == aliveSprite && state == PersonState.Zombie) {
+			return;
+		}
+		
+		state = PersonState.Zombie;
 		sprite = zombieSprite;
 	}
 	
 	public void kill() {
+		state = PersonState.Dead;
 		sprite = deadSprite;
 	}
 }

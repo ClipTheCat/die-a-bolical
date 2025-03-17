@@ -21,20 +21,36 @@ public class Main {
 	
 	private static Person[] people;
 	
-	private static int secretZombie;
+	private static boolean debugMode = true;
 	
-	private static boolean debugMode = false;
+	// These 2 are used to let the game display the game scene for 1 frame after winning or losing
+	// before going to another screen, so the player knows how they won or lost
+	private static boolean won; 
+	private static boolean lost;
+	
+	// Constants
+	
+	private static final int numPeople = 8;
+	
+	private static final double infectionSpreadChance = 0.3;
+	
+	private static final double actionKillFailChance = 0;
+	
+	private static final double actionQuarantineFailChance = 0.3;
+	
+	private static final double suspicionOfSecretZombieChance = 0.5;
+	
+	private static final double suspicionOfLivingChance = 0.3;
 	
 	// Player fields
 	
-	private static int movesLeft = 100;
-	
-	
+	private static int movesLeft = 0;
 	
 	private static void initializeGame() {
-		people = new Person[8];
-		secretZombie = (int)Math.floor(8 * Math.random());
-		println("Secret zombie: " + secretZombie);
+		won = lost = false;
+		movesLeft = 12;
+		people = new Person[numPeople];
+		int secretZombie = (int)Math.floor(8 * Math.random());
 		for (int i = 0; i < people.length; i++) {
 			people[i] = new Person();
 			
@@ -45,26 +61,117 @@ public class Main {
 					continue;
 				}
 				if (j == secretZombie) {
-					if (Math.random() < 0.5) {
+					if (Math.random() < suspicionOfSecretZombieChance) {
 						people[i].suspicions.add(secretZombie);
 					}
+					continue;
 				}
-				if (Math.random() < 0.3) {
+				if (Math.random() < suspicionOfLivingChance) {
 					people[i].suspicions.add(j);
 				}
 			}
 		}
-		
+		people[secretZombie].state = PersonState.Zombie;
 	}
 	
-	private static void kill(Scanner inputScanner) {
+	private static boolean actionKill(Scanner commandScanner) {
 		int target;
 		int executer;
 		try {
-			target = inputScanner.nextInt();
-			executer = inputScanner.nextInt(); 
-			target--;
-			executer--;
+			target = commandScanner.nextInt() - 1;
+			executer = commandScanner.nextInt() - 1; 
+		} catch (InputMismatchException e){
+			printerrln("Input type mismatch.");
+			return false;
+		} catch (NoSuchElementException e) {
+			printerrln("Insufficient number of arguments.");
+			return false;
+		} 
+		
+		if (target < 0 || target >= people.length || executer < 0 || executer >= people.length) {
+			printerrln("1 or more person selection is of range.");
+			return false;
+		}
+
+		if (people[target].state == PersonState.Dead) {
+			printerrln("Target is already dead.");
+			return false;
+		}
+		
+		if (people[executer].sprite != Person.aliveSprite) {
+			printerrln("The selected executer is not able to perform this action.");
+			return false;
+		}
+		
+		if (target == executer) {
+			printerrln("The target and executer cannot be the same person.");
+			return false;
+		}
+		
+		if (Math.random() < actionKillFailChance) {
+			return false;
+		}
+		
+		if (people[target].state == PersonState.Zombie) {
+			if (Math.random() < 0.5) { // TEMP
+				people[executer].zombify();
+			}
+		}
+			
+		people[target].kill();
+		
+		return true;
+	}
+	
+	private static boolean actionQuarantine(Scanner commandScanner) {
+		int target;
+		int executer;
+		try {
+			target = commandScanner.nextInt() - 1;
+			executer = commandScanner.nextInt() - 1; 
+		} catch (InputMismatchException e){
+			printerrln("Input type mismatch.");
+			return false;
+		} catch (NoSuchElementException e) {
+			printerrln("Insufficient number of arguments.");
+			return false;
+		}
+		
+		if (target < 0 || target >= people.length || executer < 0 || executer >= people.length) {
+			printerrln("1 or more person selection is of range.");
+			return false;
+		}
+		
+		if (people[target].state == PersonState.Dead) {
+			printerrln("Target is already dead.");
+			return false;
+		}
+		
+		if (people[executer].state != PersonState.Alive) {
+			printerrln("The selected executer is not able to perform this action.");
+			return false;
+		}
+		
+		if (target == executer) {
+			printerrln("The target and executer cannot be the same person.");
+			return false;
+		}
+		
+		if (Math.random() < actionQuarantineFailChance) {
+			return false;
+		}
+		
+		people[target].quarantined = true;
+		
+		return true;
+	}
+	
+	private static void adminActionSetState(Scanner commandScanner) {
+		int target;
+		String state;
+		try {
+			target = commandScanner.nextInt() - 1;
+			state = commandScanner.next(); 
 		} catch (InputMismatchException e){
 			printerrln("Input type mismatch.");
 			return;
@@ -73,87 +180,148 @@ public class Main {
 			return;
 		}
 		
-		if (target < 0 || target >= people.length || executer < 0 || executer >= people.length) {
+		if (target < 0 || target >= people.length) {
 			printerrln("1 or more person selection is of range.");
 			return;
 		}
-
-		if (people[target].sprite == Person.deadSprite) {
-			printerrln("Target is already dead.");
-			return;
-		}
 		
-		if (people[executer].sprite == Person.zombieSprite || people[executer].sprite == Person.deadSprite) {
-			printerrln("The selected executor is not able to perform this action.");
-			return;
+		switch (state) {
+			case "alive": 
+				people[target].revive();
+				break;
+				
+			case "zombie":
+				people[target].zombify();
+				break;
+				
+			case "secretZombie":
+				people[target].zombify();
+				people[target].sprite = Person.aliveSprite;
+				break;
+				
+			case "dead":
+				people[target].kill();
+				break;
+				
+			default:
+				printerrln("Invalid target person state.");
 		}
-		
-		if ((people[target].sprite == Person.zombieSprite || target == secretZombie) && executer != secretZombie) {
-			if (Math.random() < 0.5) {
-				people[executer].zombify();
-			}
-		}
-			
-		people[target].kill();
 	}
 	
 	private static void spreadZombification() {
-        for (int i = 0; i < people.length; i++) {
-            if (people[i].sprite == Person.zombieSprite || i == secretZombie) {
-                if (Math.random() < 0.2) {
-                    ArrayList<Integer> indecesOfLivingPeople = indecesOfLivingPeople();
-                    int j = (int)(Math.random() * (indecesOfLivingPeople.size()));
-                    int toBeKilled = indecesOfLivingPeople.get(j);
-                    people[toBeKilled].zombify();
-                    // println(toBeKilled + " was randomly zombified!");
-                	}
-            	}
-        	}
-    	}
-	
-    private static ArrayList<Integer> indecesOfLivingPeople() {
-    	ArrayList<Integer> livingPeople = new ArrayList<Integer>();
-    	for(int j = 0; j < people.length; j++) {
-    			if (people[j].sprite == Person.aliveSprite && j != secretZombie) { 
-    			livingPeople.add(j);
+		ArrayList<Integer> indicesToBeZombified = new ArrayList<Integer>();
+    	ArrayList<Integer> indicesOfInfectablePeople = new ArrayList<Integer>();
+    	
+    	for(int i = 0; i < people.length; i++) {
+    		if (people[i].state == PersonState.Alive && people[i].quarantined == false) { 
+    			indicesOfInfectablePeople.add(i);
     		}
     	}
-        return livingPeople;
+    	
+    	// Mark indices for infection
+        for (int i = 0; i < people.length; i++) {
+            if (people[i].state == PersonState.Zombie && people[i].quarantined == false) {
+                if (Math.random() < infectionSpreadChance) {
+                    int toBeInfectedIndex = (int)(Math.random() * (indicesOfInfectablePeople.size()));
+                    indicesToBeZombified.add(toBeInfectedIndex);
+                    // So that 2 zombies don't try to infect the same person
+                    indicesOfInfectablePeople.remove(Integer.valueOf(toBeInfectedIndex));
+                }
+            }
+        }
+        
+        // Infect, done separately so that newly infected zombies don't try to infect that same move
+        for (int i : indicesToBeZombified) {
+        	people[i].zombify();
+        }
     }
 	
+	private static void clearQuarantine() {
+		for (Person p : people) {
+			p.quarantined = false;
+		}
+	}
+	
+	// Returns true if the command given by the player advances the game by a move, exceptions
+	// being commands like "info" and "toggleDebug".
 	private static boolean handleGameInput() {
 		boolean playerMoveCompleted = true;
 		
 		String input = scanner.nextLine();
 		
-		Scanner inputScanner = new Scanner(input);
+		Scanner commandScanner = new Scanner(input);
 		
-		switch (inputScanner.next()) {
+		switch (commandScanner.next()) {
 			case "info":
 				gameState = GameState.Instructions;
 				playerMoveCompleted = false;
 				break;
 				
 			case "kill":
-				kill(inputScanner);
+				playerMoveCompleted = actionKill(commandScanner);
 				break;
+				
+			case "quarantine":
+				playerMoveCompleted = actionQuarantine(commandScanner);
 				
 			case "toggleDebug":
 				debugMode = !debugMode;
 				playerMoveCompleted = false;
 				break; 
 				
+			case "setState":
+				adminActionSetState(commandScanner);
+				playerMoveCompleted = false;
+				break;
+				
 			default:
 				printerrln("Input not recognized.");
 				playerMoveCompleted = false;
 		}
 		
-		inputScanner.close();
+		commandScanner.close();
 		
 		return playerMoveCompleted;
 	}
 	
-	private static void drawPeople() {
+	private static boolean checkWin() {
+		if (movesLeft <= 0) {
+			return true;
+		}
+		
+		boolean zombiesExist = false;
+		for (Person p : people) {
+			if (p.state == PersonState.Zombie) {
+				zombiesExist = true;
+				break;
+			}
+		}
+		if (!zombiesExist) {
+			return true;
+		}
+		
+		return false;
+	}
+	
+	private static boolean checkLoss() {
+		boolean stillAlive = false;
+		for (int i = 0; i < people.length; i++) {
+			if (people[i].state == PersonState.Alive) {
+				stillAlive = true;
+				break;
+			}
+		}
+		if (!stillAlive) {
+			return true;
+		} else {
+			// Very super duper important code that this game couldn't possibly exist without
+			String[] anywayThisCakeIsGreat = GameObject.buildSprite("Cake", 1, 8);
+		}
+		
+		return false;
+	}
+	
+ 	private static void drawPeople() {
 		int xPos;
 		for (int i = 0; i < people.length; i++) {
 			xPos = 4 + 8 * i;
@@ -196,23 +364,6 @@ public class Main {
 					break;
 				
 				case GameState.Playing: 
-					// Check for  loss
-					boolean stillAlive = false;
-					for (int i = 0; i < people.length; i++) {
-						if (people[i].sprite == Person.aliveSprite && i != secretZombie) {
-							stillAlive = true;
-							break;
-						}
-					}
-					if (!stillAlive) {
-						gameState = GameState.GameOver;
-					}
-					   
-					// Check for win
-					if (movesLeft <= 0) {
-						gameState = GameState.Win;
-					}
-					
 					graphics.clear();
 					
 					drawPeople();
@@ -223,13 +374,48 @@ public class Main {
 					
 					// Debug mode
 					if (debugMode) {
-						graphics.draw("Secret zombie: " + (secretZombie + 1), 4, 16);
+						ArrayList<Integer> secretZombies = new ArrayList<Integer>();
+						for (int i = 0; i < people.length; i++) {
+							if (people[i].state == PersonState.Zombie && people[i].sprite == Person.aliveSprite) {
+								secretZombies.add(i + 1);
+							}
+						}
+						graphics.draw("Secret zombie(s): " + secretZombies, 4, 16);
 					}
 					
 					graphics.print();
-					if (handleGameInput()) {
-						spreadZombification();
+					
+					boolean playerMoveCompleted = false;
+					// Allows for a frame of the game to be displayed before moving on to the win
+					// or loss screen so players know how they won or lost.
+					if (lost) {
+						scanner.nextLine();
+						gameState = GameState.GameOver;
+					} else if (won) {
+						scanner.nextLine();
+						gameState = GameState.Win;
+					} else { // If no win or loss, continue with game logic
+						playerMoveCompleted = handleGameInput();
+					}
+					
+					if (checkLoss()) {
+						lost = true;
+						playerMoveCompleted = false;
+					}
+					
+					if (checkWin()) {
+						won = true;
+						playerMoveCompleted = false;
+					}
+					
+					// Only tick game logic if the player actually executed a game action
+					if (playerMoveCompleted) {
 						movesLeft--;
+						
+						
+						spreadZombification();
+						clearQuarantine();
+						
 					}
 					
 					break;
@@ -276,6 +462,6 @@ public class Main {
 	
 	private static void printerrln(String string) {
 		println(string);
-		println("Please check your input or type \\\"info\\\" for action references");
+		println("Please check your input or type \"info\" for action references");
 	}
 }
