@@ -21,11 +21,11 @@ public class Main {
 	
 	private static Person[] people;
 	
+	private static int secretZombie;
+	
 	private static ArrayList<String> eventLog;
 	
-	private static String commandFeedback;
-	
-	private static String dialogue;
+	private static String[] dialog;
 	
 	private static boolean debugMode = true;
 	
@@ -38,15 +38,15 @@ public class Main {
 	
 	private static final int numPeople = 8;
 	
-	private static final double infectionSpreadChance = 0.4;
+	private static final double infectionSpreadChance = 0.3;
 	
 	private static final double actionKillFailChance = 0;
 	
-	private static final double actionKillInfectionPassChance = 0.7;
+	private static final double actionKillInfectionPassChance = 0.2;
 	
 	private static final double actionQuarantineFailChance = 0.3;
 	
-	private static final double suspicionOfSecretZombieChance = 0.5;
+	private static final double suspicionOfSecretZombieChance = 0.6;
 	
 	private static final double suspicionOfLivingChance = 0.3;
 	
@@ -58,7 +58,7 @@ public class Main {
 		won = lost = false;
 		movesLeft = 12;
 		people = new Person[numPeople];
-		int secretZombie = (int)Math.floor(8 * Math.random());
+		secretZombie = (int)Math.floor(8 * Math.random());
 		for (int i = 0; i < people.length; i++) {
 			people[i] = new Person();
 			
@@ -82,7 +82,7 @@ public class Main {
 		people[secretZombie].state = PersonState.Zombie;
 		
 		eventLog = new ArrayList<String>();
-		dialogue = "";
+		dialog = new String[] {};
 	}
 	
 	private static boolean actionKill(Scanner commandScanner) {
@@ -126,10 +126,13 @@ public class Main {
 		if (people[target].state == PersonState.Zombie) {
 			if (Math.random() < actionKillInfectionPassChance) {
 				people[executer].zombify();
+				eventLog.add("Zombified #" + (executer + 1) + " through kill");
 			}
 		}
 			
 		people[target].kill();
+		removeSuspicion(target);
+		eventLog.add("Killed #" + (target + 1) + " using #" + (executer + 1));
 		
 		return true;
 	}
@@ -173,6 +176,7 @@ public class Main {
 		}
 		
 		people[target].quarantined = true;
+		eventLog.add("Quarantined #" + (target + 1) + " using #" + (executer + 1));
 		
 		return true;
 	}
@@ -194,28 +198,35 @@ public class Main {
 			return false;
 		}
 		
-		if (people[target].state != PersonState.Alive) {
-			printerrln("Target cannot be questioned, because dead people and zombies don't like talking to you.");
+		if (people[target].sprite != Person.aliveSprite) {
+			printerrln("Target cannot be questioned, because you can't talk to dead people or zombies.");
 			return false;
 		}
 		
+		people[target].questioned = true;
 		String formattedSuspicions = "";
 		ArrayList<Integer> suspicions = people[target].suspicions;
 		
 		if (suspicions.size() == 0) {
-			printlnBelowPeople("#" + (target + 1) + ": I don't think anyone is a zombie here. Maybe you're just buying into alarmist propaganda.");
+			eventLog.add("Questioned #" + (target + 1));
+			printdialogln(new String[] {"I don't think anyone here is a zombie.", "Maybe you're just buying into alarmist propaganda."}, String.valueOf(target + 1));
 			return true;
 		}
 		
-		for (int i = 0; i < suspicions.size(); i++) {
-			formattedSuspicions += i == people.length - 1 ? "and #" + (suspicions.get(i) + 1) : "#" + (suspicions.get(i) + 1) + ", ";
+		if (suspicions.size() == 1) {
+			formattedSuspicions = "#" + (suspicions.get(0) + 1);
+		} else {
+			for (int i = 0; i < suspicions.size(); i++) {
+				formattedSuspicions += i == suspicions.size() - 1 ? "and #" + (suspicions.get(i) + 1) : "#" + (suspicions.get(i) + 1) + ", ";
+			}
 		}
 		
-		printlnBelowPeople("#" + (target + 1) + ": I think " + formattedSuspicions + " are acting weird.");
+		printdialogln("I think " + formattedSuspicions + (suspicions.size() > 1 ? " are" : " is") + " acting weird.", String.valueOf(target + 1));
+		eventLog.add("Questioned #" + (target + 1));
 		return true;
 	}
 	
-	private static void adminActionSetState(Scanner commandScanner) {
+	private static void debugActionSetState(Scanner commandScanner) {
 		int target;
 		String state;
 		try {
@@ -237,19 +248,23 @@ public class Main {
 		switch (state) {
 			case "alive": 
 				people[target].revive();
+				eventLog.add("*Revived #" + (target + 1));
 				break;
 				
 			case "zombie":
 				people[target].zombify();
+				eventLog.add("*Infected #" + (target + 1));
 				break;
 				
 			case "secretZombie":
 				people[target].zombify();
 				people[target].sprite = Person.aliveSprite;
+				eventLog.add("*Secretly infected #" + (target + 1));
 				break;
 				
 			case "dead":
 				people[target].kill();
+				eventLog.add("*Killed #" + (target + 1));
 				break;
 				
 			default:
@@ -270,8 +285,14 @@ public class Main {
     	// Mark indices for infection
         for (int i = 0; i < people.length; i++) {
             if (people[i].state == PersonState.Zombie && people[i].quarantined == false) {
-                if (Math.random() < infectionSpreadChance) {
-                    int toBeInfectedIndex = (int)(Math.random() * (indicesOfInfectablePeople.size()));
+            	double infectionChance;
+            	if (people[i].sprite == Person.aliveSprite) {
+            		infectionChance = 2 * infectionSpreadChance;
+            	} else {
+            		infectionChance = infectionSpreadChance;
+            	}
+                if (Math.random() < infectionChance && indicesOfInfectablePeople.size() > 0) {
+                    int toBeInfectedIndex = indicesOfInfectablePeople.get((int)(Math.random() * (indicesOfInfectablePeople.size())));
                     indicesToBeZombified.add(toBeInfectedIndex);
                     // So that 2 zombies don't try to infect the same person
                     indicesOfInfectablePeople.remove(Integer.valueOf(toBeInfectedIndex));
@@ -282,12 +303,20 @@ public class Main {
         // Infect, done separately so that newly infected zombies don't try to infect that same move
         for (int i : indicesToBeZombified) {
         	people[i].zombify();
+        	removeSuspicion(i);
+        	eventLog.add("Zombified #" + (i + 1));
         }
     }
 	
 	private static void clearQuarantine() {
 		for (Person p : people) {
 			p.quarantined = false;
+		}
+	}
+	
+	private static void removeSuspicion(int index) {
+		for (Person p : people) {
+			p.suspicions.remove(Integer.valueOf(index));
 		}
 	}
 	
@@ -316,21 +345,29 @@ public class Main {
 				
 			case "question":
 				playerMoveCompleted = actionQuestion(commandScanner);
+				break;
 				
 			case "toggleDebug":
 				debugMode = !debugMode;
+				eventLog.add("*Toggled debug mode");
 				playerMoveCompleted = false;
 				break; 
 				
 			case "setState":
 				if (debugMode) {
-					adminActionSetState(commandScanner);
+					debugActionSetState(commandScanner);
 					playerMoveCompleted = false;
+					break;
+				}
+			
+			case "skip":
+				if (debugMode) {
+					playerMoveCompleted = true;
 					break;
 				}
 				
 			default:
-				printerrln("Input not recognized.");
+				printerrln("Input not recognized, or the command requires debug mode.");
 				playerMoveCompleted = false;
 		}
 		
@@ -382,8 +419,12 @@ public class Main {
 			xPos = 4 + 8 * i;
 			graphics.draw(people[i].sprite, xPos, 6);
 			graphics.draw("#" + (i + 1), xPos, 5);
+			if (people[i].questioned) {
+				graphics.draw("Questd.", xPos, 12);
+			}
 		}
 	}
+ 	
 	
 	private static void update() {
 		try {
@@ -391,9 +432,9 @@ public class Main {
 				case GameState.MainMenu: 
 					graphics.clear();
 					
-					graphics.draw("Zombies!", 3, 3);
-					graphics.draw("A game about preventing a zombie virus outbreak", 3, 4);
-					graphics.draw("\"play\" to start game, \"exit\" to quit the program.", 3, graphics.canvas.height - 3);
+					graphics.draw("Zombies!", 4, 3);
+					graphics.draw("A game about preventing a zombie virus outbreak", 4, 4);
+					graphics.draw("\"play\" to start game, \"exit\" to quit the program.", 4, graphics.canvas.height - 3);
 					
 					graphics.print();
 					
@@ -401,7 +442,7 @@ public class Main {
 					if (input.equalsIgnoreCase("play")) {
 						gameState = GameState.Instructions;
 						initializeGame();
-					} else if (input.equalsIgnoreCase("quit")) {
+					} else if (input.equalsIgnoreCase("exit")) {
 						gameRunning = false;
 					}
 					
@@ -425,8 +466,12 @@ public class Main {
 					
 					// GUI
 					graphics.draw(new Rectangle(0, 0, 35, graphics.canvas.height - 2).sprite, 77, 1); // Events logger box
-					graphics.draw("Moves left: " + movesLeft, 4, 12);
-					graphics.draw(dialogue, 4, 16);
+					graphics.draw("Moves left: " + movesLeft, 4, 14);
+					graphics.draw(dialog, 4, 16);
+					dialog = new String[] {};
+					for (int i = 0; i < eventLog.size(); i++) {
+						graphics.draw(eventLog.get(i), 78, 2 + i);
+					}
 					
 					// Debug mode
 					if (debugMode) {
@@ -445,36 +490,34 @@ public class Main {
 					// Allows for a frame of the game to be displayed before moving on to the win
 					// or loss screen so players know how they won or lost.
 					if (lost) {
-						
-						
 						scanner.nextLine();
 						gameState = GameState.GameOver;
 					} else if (won) {
-						
-						
 						scanner.nextLine();
 						gameState = GameState.Win;
 					} else { // If no win or loss, continue with game logic
 						playerMoveCompleted = handleGameInput();
 					}
 					
-					if (checkLoss()) {
-						lost = true;
-						playerMoveCompleted = false;
+					if (playerMoveCompleted) {
+						movesLeft--;
 					}
 					
 					if (checkWin()) {
+						printdialogln("You won! The secret zombie was person #" + (secretZombie + 1) + ".", "Game");
 						won = true;
 						playerMoveCompleted = false;
 					}
 					
-					// Only tick game logic if the player actually executed a game action
+					// Only tick game logic if the player actually executed a command that costs a move
 					if (playerMoveCompleted) {
-						movesLeft--;
-						
 						spreadZombification();
 						clearQuarantine();
-						dialogue = "";
+					}
+					
+					if (checkLoss()) {
+						printdialogln("You lost! The secret zombie was person #" + (secretZombie + 1) + ".", "Game");
+						lost = true;
 					}
 					
 					break;
@@ -482,8 +525,8 @@ public class Main {
 				case GameState.GameOver: 
 					graphics.clear();
 					
-					graphics.draw("The zombies ate your brains! And your arms. And every other part of you. They were very hungry. Try again?", 1, 1);
-					graphics.draw("Enter anything to return to the main menu.", 1, 2);
+					graphics.draw("The zombies ate your brains! And your arms. And every other part of you. They were very hungry. Try again?", 4, 3);
+					graphics.draw("Enter anything to return to the main menu.", 4, graphics.canvas.height - 3);
 					
 					graphics.print();
 					scanner.nextLine();
@@ -493,8 +536,8 @@ public class Main {
 				case GameState.Win:
 					graphics.clear();
 					
-					graphics.draw("You beat the zombies!", 1, 1);
-					graphics.draw("Enter anything to return to the main menu.", 1, 2);
+					graphics.draw("You beat the zombies!", 4, 3);
+					graphics.draw("Enter anything to return to the main menu.", 4, graphics.canvas.height - 3);
 					
 					graphics.print();
 					scanner.nextLine();
@@ -508,7 +551,8 @@ public class Main {
 		}
 	
 	public static void main(String[] args) {
-		println("\n\n\n\n\n══════════════════════════════\nGame started!\n══════════════════════════════\n\n\n\n\n");
+		// Why is this printing after frame 1?
+		//println("\n\n\n\n\n══════════════════════════════\nGame started!\n══════════════════════════════\n\n\n\n\n");
 		
 		while(gameRunning) {
 			update();
@@ -517,17 +561,24 @@ public class Main {
 	
 	
 	private static void println(String string) {
-		System.out.println(string);
+		graphics.printOutput += (graphics.printOutput == "" ? "" : "\n") + string;
 	}
 	
 	
 	private static void printerrln(String string) {
-		println(string);
-		println("Please check your input or type \"info\" for action references");
+		graphics.printOutput += (graphics.printOutput == "" ? "" : "\n") + string + "\nPlease check your input or type \"info\" for action references";
 	}
 	
 	// Writes text as dialogue under the line of people.  
-	private static void printlnBelowPeople(String string, int speakerIndex) {
-		dialogue = speakerIndex + 1 + ": " + string;
+	private static void printdialogln(String string, String speaker) {
+		dialog = new String[] {speaker + ": ", string};
+	}
+	
+	private static void printdialogln(String[] strings, String speaker) {
+		dialog = new String[strings.length + 1];
+		dialog[0] = speaker + ": ";
+		for (int i = 1; i < dialog.length; i++) {
+			dialog[i] = strings[i - 1];
+		}
 	}
 }

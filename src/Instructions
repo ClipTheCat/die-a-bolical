@@ -3,10 +3,10 @@ The Game
   The goal of the game is to have at least 1 person alive when you run out of moves, or kill every 
   zombie. You lose when all people are zombies or dead. 
   
-  All zombies have a 20% chance to infect a random living person each turn. 
+  Zombies have a 30% chance to infect a random living person each turn. 
   
   There is 1 secret zombie at the beginning of the game. They act and look exactly like a living
-  person, but infect living people just as a zombie does. They are revealed when killed.
+  person, but infect living people twice as often. They are revealed at the end of the game.
 
 Actions
 
@@ -20,11 +20,11 @@ Actions
     (Requires a living person to execute)
     Kills a person, taking them out of the game permanently. 
     Fail: 0% 
-    Side effect: If the target is a zombie, there is a 70% chance the executer will be infected.  
+    Side effect: If the target is a zombie, there is a 30% chance the executer will be infected.  
     
   question [target (living)] 
     Gets a person's list of individuals they are suspicious of. 
-    Each person has a 30% chance to be suspicious of another real living person and a 50% chance to 
+    Each person has a 30% chance to be suspicious of another real living person and a 60% chance to 
     be suspicious of the secret zombie. These are constant and are determined when the game starts.
     
 You can open this screen again any time by entering "info".

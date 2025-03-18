@@ -7,6 +7,7 @@ public class Person extends GameObject {
 	public PersonState state; // the secret zombie has a value of PersonState.Zombie in this field but their sprite is the aliveSprite
 	public ArrayList<Integer> suspicions;
 	public boolean quarantined;
+	public boolean questioned;
 	
 	public static final String[] aliveSprite = buildSprite("Sprites", 1, 5);
 	public static final String[] deadSprite = buildSprite("Sprites", 7, 5);
@@ -17,6 +18,7 @@ public class Person extends GameObject {
 		state = PersonState.Alive;
 		suspicions = new ArrayList<Integer>();
 		quarantined = false;
+		questioned = false;
 	}
 	
 	public void revive() {

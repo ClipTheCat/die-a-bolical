@@ -21,6 +21,9 @@ public class ConsoleGraphics {
 	
 	public Rectangle canvas;
 	
+	//A string displayed under the frame, like command feedback 
+		public String printOutput;
+	
 	public int frame;
 	
 	public ConsoleGraphics(int canvasWidth, int canvasHeight) {
@@ -35,6 +38,8 @@ public class ConsoleGraphics {
 		for (int i = 0; i < lines.length; i++) {
 			lines[i] = new StringBuilder(new String(" ").repeat(canvas.width));
 		}
+		
+		printOutput = "";
 		
 		frame = 1;
 	}
@@ -97,7 +102,12 @@ public class ConsoleGraphics {
 			System.out.println(lines[i]);
 		}
 		
-		System.out.println("");
+		System.out.println();
+		if (!printOutput.equals("")) {
+			System.out.println(printOutput);
+			printOutput = "";
+			System.out.println();
+		}
 		System.out.print("> ");
 	}
 }
