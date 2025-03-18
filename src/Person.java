@@ -1,9 +1,11 @@
-import java.util.ArrayList;
+// The class for objects representing a person in the game. This does not contain much logic and
+// mostly only stores their state. 
 
+import java.util.ArrayList;
 
 public class Person extends GameObject {
 	
-	// AI fields
+	// State fields
 	public PersonState state; // the secret zombie has a value of PersonState.Zombie in this field but their sprite is the aliveSprite
 	public ArrayList<Integer> suspicions;
 	public boolean quarantined;
@@ -14,8 +16,7 @@ public class Person extends GameObject {
 	public static final String[] zombieSprite = buildSprite("Sprites", 13, 5);
 	
 	public Person() {
-		sprite = aliveSprite;
-		state = PersonState.Alive;
+		revive();
 		suspicions = new ArrayList<Integer>();
 		quarantined = false;
 		questioned = false;

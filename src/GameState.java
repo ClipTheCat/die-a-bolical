@@ -1,3 +1,4 @@
+// Represents the state the game is in
 
 public enum GameState {
 	MainMenu,

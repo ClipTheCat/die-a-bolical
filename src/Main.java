@@ -1,4 +1,5 @@
-// Main class
+// The Main class contains the main game loop, code for all commands, and controls the logic of 
+// each person's state and interactions with one another. 
 
 import java.util.ArrayList;
 import java.util.Scanner;
@@ -40,7 +41,7 @@ public class Main {
 	
 	private static final int numMoves = 100;
 	
-	private static final double infectionSpreadChance = 0;//.3;
+	private static final double infectionSpreadChance = 0.3;
 	
 	private static final double actionKillFailChance = 0;
 	
@@ -322,8 +323,8 @@ public class Main {
 		}
 	}
 	
-	// Returns true if the command given by the player advances the game by a move, exceptions
-	// being commands like "info" and "toggleDebug".
+	// Returns true if the command given by the player advances the game by a move, commands that
+	// don't being ones like "skip", "info", and "toggleDebug".
 	private static boolean handleGameInput() {
 		boolean playerMoveCompleted = true;
 		
@@ -406,10 +407,9 @@ public class Main {
 			}
 		}
 		if (!stillAlive) {
-			return true;
-		} else {
-			// Very super duper important code that this game couldn't possibly exist without
+			// Very super duper important text sprite, thanks Jonathan Coulton and Ellen McLain
 			String[] anywayThisCakeIsGreat = GameObject.buildSprite("Cake", 1, 8);
+			return true;
 		}
 		
 		return false;
