@@ -12,16 +12,20 @@
  * example a Rectangle with equal width and height will not appear as a square. 
  */
 
+// Using a StringBuilder can be more performant for larger sprites and more draw calls, but I'm not
+// sure if it's any faster than basic String manipulation for our purposes. It does have some
+// convenient methods too.
 import java.lang.StringBuilder;
 
 public class ConsoleGraphics {
 	
+	// A frame is stored as an array of rows, each row being a StringBuilder storing a String
 	private StringBuilder[] lines;
 	
 	public Rectangle canvas;
 	
-	//A string displayed under the frame, like command feedback 
-		public String printOutput;
+	//A string displayed under the frame, including things like command feedback 
+	public String printOutput;
 	
 	public int frame;
 	
@@ -101,6 +105,7 @@ public class ConsoleGraphics {
 			System.out.println(lines[i]);
 		}
 		
+		// Print output
 		System.out.println();
 		if (!printOutput.equals("")) {
 			System.out.println(printOutput);

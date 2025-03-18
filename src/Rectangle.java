@@ -6,10 +6,12 @@ public class Rectangle extends GameObject {
 	
 	public String text;
 	
+	// TODO custom border characters
 	// In the form:
 	// { topLeft, topRight, bottomRight, bottomLeft, horizontalSide, verticalSide, fill }
 	// private char[] borderCharacters; 
 	
+	// Override GameObject.buildSprite to automatically make the Rectangle's sprite
 	private static String[] buildSprite(int width, int height) {
 		String[] sprite = new String[height];
 		
@@ -38,6 +40,7 @@ public class Rectangle extends GameObject {
 		sprite = buildSprite(this.width, this.height);
 	}
 	
+	// Unused 
 	public Rectangle(int x, int y, int width, int height, String text) {
 		this.x = x;
 		this.y = y;

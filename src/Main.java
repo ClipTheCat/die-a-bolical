@@ -28,7 +28,7 @@ public class Main {
 	
 	private static String[] dialog;
 	
-	private static boolean debugMode = true;
+	private static boolean debugMode = false;
 	
 	// These 2 are used to let the game display the game scene for 1 frame after winning or losing
 	// before going to another screen, so the player knows how they won or lost
@@ -41,7 +41,7 @@ public class Main {
 	
 	private static final int numMoves = 12;
 	
-	private static final double infectionSpreadChance = 0.3;
+	private static final double infectionSpreadChance = 0.2;
 	
 	private static final double actionKillFailChance = 0;
 	
@@ -103,12 +103,12 @@ public class Main {
 		} 
 		
 		if (target < 0 || target >= people.length || executer < 0 || executer >= people.length) {
-			printerrln("1 or more person selection is of range.");
+			printerrln("1 or more selection is out of range.");
 			return false;
 		}
 
 		if (people[target].state == PersonState.Dead) {
-			printerrln("Target is already dead.");
+			printerrln("The target is already dead. Woo hoo...");
 			return false;
 		}
 		
@@ -118,7 +118,7 @@ public class Main {
 		}
 		
 		if (target == executer) {
-			printerrln("The target and executer cannot be the same person.");
+			printerrln("The target and executer cannot be the same person. Nice try.");
 			return false;
 		}
 		
@@ -155,12 +155,12 @@ public class Main {
 		}
 		
 		if (target < 0 || target >= people.length || executer < 0 || executer >= people.length) {
-			printerrln("1 or more selections are of range.");
+			printerrln("1 or more selection is out of range.");
 			return false;
 		}
 		
 		if (people[target].state == PersonState.Dead) {
-			printerrln("The target is already dead.");
+			printerrln("The target is dead. Dead men tell no tales and don't spread the infection.");
 			return false;
 		}
 		
@@ -170,7 +170,7 @@ public class Main {
 		}
 		
 		if (target == executer) {
-			printerrln("The target and executer cannot be the same person.");
+			printerrln("The target and executer cannot be the same person. Nice try.");
 			return false;
 		}
 		
@@ -202,7 +202,7 @@ public class Main {
 		}
 		
 		if (people[target].sprite != Person.aliveSprite) {
-			printerrln("Target cannot be questioned, because you can't talk to dead people or zombies.");
+			printerrln("The target cannot be questioned, because you can't talk to dead people or zombies.");
 			return false;
 		}
 		
@@ -229,7 +229,7 @@ public class Main {
 		return true;
 	}
 	
-	private static void debugActionSetState(Scanner commandScanner) {
+	private static void debugSetState(Scanner commandScanner) {
 		int target;
 		String state;
 		try {
@@ -358,7 +358,7 @@ public class Main {
 				
 			case "setState":
 				if (debugMode) {
-					debugActionSetState(commandScanner);
+					debugSetState(commandScanner);
 					playerMoveCompleted = false;
 					break;
 				}
@@ -473,8 +473,6 @@ public class Main {
 					dialog = new String[] {};
 					if (eventLog.size() > 0) {
 						int eventDisplayScroll = eventLog.size() > graphics.canvas.height - 4 ? eventLog.size() - (graphics.canvas.height - 4) : 0;
-						println("" + Math.min(eventLog.size(), graphics.canvas.height));
-						println("Scroll: " + eventDisplayScroll);
 						for (int i = 0; i < Math.min(eventLog.size(), graphics.canvas.height - 4); i++) {
 							graphics.draw(eventLog.get(i + eventDisplayScroll), 78, 2 + i);
 						}
