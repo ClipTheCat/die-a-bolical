@@ -38,7 +38,9 @@ public class Main {
 	
 	private static final int numPeople = 8;
 	
-	private static final double infectionSpreadChance = 0.3;
+	private static final int numMoves = 100;
+	
+	private static final double infectionSpreadChance = 0;//.3;
 	
 	private static final double actionKillFailChance = 0;
 	
@@ -52,11 +54,11 @@ public class Main {
 	
 	// Player fields
 	
-	private static int movesLeft = 0;
+	private static int movesLeft;
 	
 	private static void initializeGame() {
 		won = lost = false;
-		movesLeft = 12;
+		movesLeft = numMoves;
 		people = new Person[numPeople];
 		secretZombie = (int)Math.floor(8 * Math.random());
 		for (int i = 0; i < people.length; i++) {
@@ -194,7 +196,7 @@ public class Main {
 		}
 		
 		if (target < 0 || target >= people.length) {
-			printerrln("The selection is of range.");
+			printerrln("The selection is out of range.");
 			return false;
 		}
 		
@@ -241,7 +243,7 @@ public class Main {
 		}
 		
 		if (target < 0 || target >= people.length) {
-			printerrln("1 or more person selection is of range.");
+			printerrln("The selection is out of range.");
 			return;
 		}
 		
@@ -469,8 +471,13 @@ public class Main {
 					graphics.draw("Moves left: " + movesLeft, 4, 14);
 					graphics.draw(dialog, 4, 16);
 					dialog = new String[] {};
-					for (int i = 0; i < eventLog.size(); i++) {
-						graphics.draw(eventLog.get(i), 78, 2 + i);
+					if (eventLog.size() > 0) {
+						int eventDisplayScroll = eventLog.size() > graphics.canvas.height - 4 ? eventLog.size() - (graphics.canvas.height - 4) : 0;
+						println("" + Math.min(eventLog.size(), graphics.canvas.height));
+						println("Scroll: " + eventDisplayScroll);
+						for (int i = 0; i < Math.min(eventLog.size(), graphics.canvas.height - 4); i++) {
+							graphics.draw(eventLog.get(i + eventDisplayScroll), 78, 2 + i);
+						}
 					}
 					
 					// Debug mode
