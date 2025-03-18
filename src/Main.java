@@ -554,8 +554,7 @@ public class Main {
 			e.printStackTrace();
 			scanner.nextLine();
 		}
-		
-		}
+	}
 	
 	public static void main(String[] args) {
 		// Why is this printing after frame 1?
@@ -565,7 +564,6 @@ public class Main {
 			update();
 		}
 	}
-	
 	
 	private static void println(String string) {
 		graphics.printOutput += (graphics.printOutput == "" ? "" : "\n") + string;
