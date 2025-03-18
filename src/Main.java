@@ -39,7 +39,7 @@ public class Main {
 	
 	private static final int numPeople = 8;
 	
-	private static final int numMoves = 100;
+	private static final int numMoves = 12;
 	
 	private static final double infectionSpreadChance = 0.3;
 	
